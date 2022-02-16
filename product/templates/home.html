@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% for a in arr %}
+<form action="{% url 'payment:payment' %}" method="post">
+    <div class="form-group">
+        {% csrf_token %}
+        <input type="hidden" name="amount" value="{{a}}">
+        <input type="submit" class="btn btn-primary" value="Pay ₹{{a}}">
+    </div>
+</form>
+
+{% endfor %}
+
+<form action="{% url 'payment:payment' %}" method="post">
+    <div class="form-group">
+        {% csrf_token %}
+        <label for="manual" >Enter Amount Manually</label>
+        <input id="manual" class="form-control" style="width:revert;" type="number" name="amount">
+        <input type="submit" class="btn btn-primary" value="Pay">
+    </div>
+</form>
+{% endblock content %}

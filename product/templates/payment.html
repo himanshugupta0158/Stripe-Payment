@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% load mathfilters %}
+
+{% block content %}
+
+<h2>Pay ₹{{amount}}</h2>
+
+<form action="{% url 'payment:charge' %}" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="amount" value="{{amount|mul:100}}">
+</form><script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+            data-key="{{ key }}"
+            data-description="A Django Charge"
+            data-amount="{{ amount|mul:100 }}"
+            data-locale="auto">
+        </script>
+
+{% endblock content %}

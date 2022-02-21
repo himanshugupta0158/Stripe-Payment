@@ -1,31 +1,74 @@
-from locale import currency
-from django.shortcuts import render
+import json
+from django.shortcuts import redirect, render
 import stripe
-from core.settings import STRIPE_PUBLISHABLE_KEY , STRIPE_SECRET_KEY
+from django.core.mail import send_mail
+from django.conf import settings
+from django.views.generic import TemplateView
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse, HttpResponse
+from django.views import View
+from .models import Product
+from .models import Product , Order
 
-stripe.api_key = STRIPE_SECRET_KEY
 
 
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
-def index(request):
-    return render(request, 'home.html', {'arr':[5.0,10.0,15.0,20.0]})
 
-def payment(request):
-    if request.method == 'POST' :
-        context = {
-            'key' : STRIPE_PUBLISHABLE_KEY,
-            'amount' : request.POST['amount']
-        }
-        return render(request , 'payment.html' , context)
+class SuccessView(TemplateView):
+    template_name = "success.html"
 
-def charge(request):
-    if request.method == 'POST' :
-        amount = int(float(request.POST['amount']))
-        charge = stripe.Charge.create(
-            amount=amount,
-            currency='usd',
-            description = 'A Django Charge',
-            source = request.POST['stripeToken']
+
+class CancelView(TemplateView):
+    template_name = "cancel.html"
+
+
+class CreateCheckoutSessionView(View):
+    def post(self, request, pk):
+        product = Product.objects.get(pk=pk)
+        YOUR_DOMAIN = "http://127.0.0.1:8000"
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[
+                {
+                    'price_data': {
+                        'currency': 'inr',
+                        'unit_amount': product.price*100,
+                        'product_data': {
+                            'name': product.name,
+                            # 'images': ['https://i.imgur.com/EHyR2nP.png'],
+                        },
+                    },
+                    'quantity': 1,
+                },
+            ],
+            metadata={
+                "product_id": product.id
+            },
+            mode='payment',
+            success_url=YOUR_DOMAIN + '/buy/' + str(product.id),
+            cancel_url=YOUR_DOMAIN + '/cancel/',
         )
-        return render(request , 'charge.html' , {'amount' : amount/100})
-        
+        return JsonResponse({
+            'id': checkout_session.id
+        })
+
+
+
+class Products(View):
+    def get(self , request):
+        products = Product.objects.all()
+        return render(request , "products.html" , {"products":products , "STRIPE_PUBLIC_KEY":settings.STRIPE_PUBLIC_KEY})
+
+
+class Buy_Product(View):
+    def get(self , request , pk):
+        product = Product.objects.filter(pk = pk).first()
+        order = Order.objects.create(product = product)
+        return redirect("payment:order")
+
+
+class Order_Product(View):
+    def get(self , request ):
+        orders = Order.objects.all()
+        return render(request , "order.html" , {"orders": orders})

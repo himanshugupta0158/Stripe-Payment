@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div>
+<div class="list-group">
+    <div class="list-group-item active">
+        Orders
+    </div>
+    {%for order in orders%}
+    <div class="list-group-item">
+    <h3>{{ order.product.name }}</h3>
+    <h5>{{ order.product.price }} Rs.</h5>
+    <h5>{{ order.ordered_at }}</h5>
+    </div>
+    {% endfor %}
+</div>
+<br>
+<a class="badge badge-primary p-2" href="/">Go To Products</a>
+
+</div>
+{% endblock content %}

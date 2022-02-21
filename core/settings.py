@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 import os
 from pathlib import Path
-from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -57,7 +56,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR , 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -125,7 +124,5 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY')
-STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY')
-
-
+STRIPE_PUBLIC_KEY = "pk_test_51KT2Q7SGWWpTwqWDFaPlwVPTyfxar43KyUNA7gn63I0Q5oX3Oj4C7hkJlaGY1mcxdT1HUHSOFvdcyNIE1qMMv2oz00U5DYH0AM"
+STRIPE_SECRET_KEY = "sk_test_51KT2Q7SGWWpTwqWDyc9jCgnVygntbKBgrD3Hh8LayH2H2toyJwkLUDdYUik7aDKFV0DtQpshpjSYJYtAIVtFSJnJ00Nv3uCI9K"

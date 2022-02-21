@@ -1,0 +1,75 @@
+<html>
+    <head>
+        <title>Buy cool new product</title>
+        <script src="https://polyfill.io/v3/polyfill.min.js?version=3.52.1&features=fetch"></script>
+        <script src="https://js.stripe.com/v3/"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+      </head>
+    <body>
+
+        <div class="container">
+            <div class="list-group">
+                <div class="list-group-item active">
+                    Products
+                </div>
+            {%for product in products%}
+            <div class="list-group-item">
+            <h3>{{ product.name }}</h3>
+            <h5>${{ product.price }}</h5>
+            <button class="btn btn-success p-2" onclick = "myfunction({{product.id}} , {{ product.price }} )">Order</button>
+            </div>
+            {% endfor %}
+        </div>
+        </div>
+        {% csrf_token %}
+
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    </body>
+
+    </body>
+    <script type="text/javascript">
+
+      
+
+      function myfunction(id , price){
+        console.log("hello")
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        var stripe = Stripe("{{ STRIPE_PUBLIC_KEY }}");
+        if(price < 1){
+          alert("Price must be equal 1 or greater than 1.")
+        } 
+        fetch("http://127.0.0.1:8000/create-checkout-session/"+id+"/", {
+          method: "POST",
+          headers: {
+              'X-CSRFToken': csrftoken
+          }
+        })
+          .then(function (response) {
+            return response.json();
+          })
+          .then(function (session) {
+            return stripe.redirectToCheckout({ sessionId: session.id });
+          })
+          .then(function (result) {
+            // If redirectToCheckout fails due to a browser or network
+            // error, you should display the localized error message to your
+            // customer using error.message.
+            if (result.error) {
+              alert(result.error.message);
+            }
+          })
+          .catch(function (error) {
+            console.error("Error:", error);
+          });
+      }
+      
+
+          
+    
+        
+    
+      </script>
+
+</html>
